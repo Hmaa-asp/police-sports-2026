@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Medal Tally - MIZORAM POLICE SPORTS MEET, 2026</title>
+<style>
+*{box-sizing:border-box;font-family:system-ui,Arial}
+body{margin:0;background:#eef2f7;padding:12px}
+.card{max-width:850px;margin:auto;background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.12)}
+.header{background:#0B2C5A;color:#fff;padding:22px;text-align:center}
+.header h1{margin:0;font-size:22px}.header p{color:#FFD700;margin:6px 0 0}
+.body{padding:16px}
+button{padding:13px;border:none;border-radius:12px;color:#fff;font-weight:800;font-size:14px;cursor:pointer;width:100%}
+.refresh{background:#f59e0b}.wa{background:#25D366;margin-top:10px}
+table{width:100%;border-collapse:collapse;margin-top:12px;font-size:13px}
+th,td{border:1px solid #ddd;padding:8px;text-align:left}th{background:#0B2C5A;color:#fff}
+.tally th{background:#B8860B}
+input{width:100%;padding:12px;border:1px solid #ccc;border-radius:10px;font-size:15px;margin-top:12px}
+.tab{display:flex;gap:8px;margin-top:16px}
+.tab button{background:#ddd;color:#333}.tab button.active{background:#0B2C5A;color:#fff}
+.hint{font-size:12px;color:#888;text-align:center}
+.debug{background:#FFF3CD;border:1px solid #FFC107;padding:10px;border-radius:10px;font-size:12px;margin-top:10px;word-break:break-all}
+</style>
+</head>
+<body>
+<div class="card">
+<div class="header"><h1>🏆 MIZORAM POLICE SPORTS MEET, 2026</h1><p>Live Medal Tally & Results - Tu pawhin en theihna</p></div>
+<div class="body">
+<div class="tab">
+<button id="tabTally" class="active" onclick="showTab('tally')">🏅 Medal Tally</button>
+<button id="tabList" onclick="showTab('list')">📋 All Results</button>
+</div>
+<div id="tallyTab">
+<div style="display:flex;gap:8px"><button class="refresh" onclick="refreshFromSheet()">🔄 Refresh - Sheet atangin a la thar</button></div>
+<p id="tallyUpdated" class="hint"></p>
+<h3 style="text-align:center">🏅 LIVE MEDAL TALLY</h3>
+<table class="tally"><thead><tr><th>Rank</th><th>Contingent</th><th>🥇 Gold</th><th>🥈 Silver</th><th>🥉 Bronze</th><th>Total</th></tr></thead><tbody id="tallyBody"></tbody></table>
+<button class="wa" onclick="shareTally()">📲 Tally WhatsApp Share</button>
+</div>
+<div id="listTab" style="display:none">
+<input id="searchBox" placeholder="🔍 Search - Hming / Contingent / Event..." onkeyup="renderTable()">
+<div style="overflow-x:auto"><table><thead><tr><th>Time</th><th>Contingent</th><th>Name</th><th>Category</th><th>Event</th><th>Medal</th><th>Result</th><th>Reported By</th></tr></thead><tbody id="tbody"></tbody></table></div>
+<p id="count" style="text-align:center;font-weight:700"></p>
+</div>
+<p class="hint" id="status">⏳ Loading...</p>
+<div id="debugBox" class="debug" style="display:none"></div>
+<button onclick="goSubmit()" style="background:#0B2C5A;margin-top:12px">📝 Result Submit  i duh chuan hetah lut rawh (Password ngai)</button>
+</div></div>
+<script>
+const SHEET_URL="https://script.google.com/macros/s/AKfycbwWu2WdPUlI0glsOvLDZLNztOugG9zlqaoKd7YMwccMwPT0QHFt3r9J9kbkmwKFDEC56A/exec";
+const CONTINGENTS=["1st Bn. MAP","2nd Bn. MAP","3rd Bn. MAP","5th IR Bn.","Northern Range","Southern Range","Central Range","Chhimtuipui Range","Western Range","North East Range","Red Group","PHQ Group"];
+let data=[];
+function showTab(t){
+ document.getElementById('tallyTab').style.display=t==='tally'?'block':'none';
+ document.getElementById('listTab').style.display=t==='list'?'block':'none';
+ document.getElementById('tabTally').className=t==='tally'?'active':'';
+ document.getElementById('tabList').className=t==='list'?'active':'';
+}
+function goSubmit(){ window.location.href='index.html'; }
+function onSheetData(j){
+  if(j && j.results){
+    data = j.results;
+    document.getElementById('status').innerText="✅ Updated: "+j.updated+" • Total: "+j.total;
+    document.getElementById('tallyUpdated').innerText="Last Updated: "+j.updated;
+    document.getElementById('debugBox').style.display='none';
+  } else {
+    document.getElementById('status').innerText="⚠️ Data a rawn thleng lo - Sheetah data a awm em check rawh?";
+  }
+  renderTable(); renderTally();
+}
+function refreshFromSheet(){
+  document.getElementById('status').innerText="⏳ Google Sheet atangin a la mek...";
+  let old = document.getElementById('jsonpScript');
+  if(old) old.remove();
+  let s = document.createElement('script');
+  s.id = 'jsonpScript';
+  s.src = SHEET_URL + "?callback=onSheetData&t=" + Date.now();
+  s.onerror = function(){
+    document.getElementById('status').innerText="❌ Sheet atangin a la thei lo - Apps Script Deploy New version a rawn ti em check rawh";
+    let b=document.getElementById('debugBox'); b.style.display='block'; b.innerText="Apps Script URL: "+SHEET_URL+" - Deploy > Manage deploymentsah New versionin Deploy a ngai.";
+  };
+  document.body.appendChild(s);
+  setTimeout(function(){
+    if(document.getElementById('status').innerText.includes("la mek")){
+      document.getElementById('status').innerText="⚠️ A rei lutuk - Refresh leh chhin rawh";
+    }
+  }, 8000);
+}
+function renderTally(){
+  let tally=CONTINGENTS.map(c=>({name:c,gold:data.filter(d=>d.contingent===c&&d.medal==='Gold').length,silver:data.filter(d=>d.contingent===c&&d.medal==='Silver').length,bronze:data.filter(d=>d.contingent===c&&d.medal==='Bronze').length}));
+  tally.forEach(t=>t.total=t.gold+t.silver+t.bronze);
+  tally.sort((a,b)=>b.gold-a.gold||b.silver-a.silver||b.bronze-a.bronze);
+  document.getElementById('tallyBody').innerHTML=tally.map((t,i)=>`<tr><td>${i+1}</td><td><b>${t.name}</b></td><td style="color:#B8860B;font-weight:800">${t.gold}</td><td style="color:#666;font-weight:800">${t.silver}</td><td style="color:#8B4513;font-weight:800">${t.bronze}</td><td><b>${t.total}</b></td></tr>`).join('');
+}
+function renderTable(){
+  let q=(document.getElementById('searchBox').value||'').toLowerCase();
+  let filtered=data.filter(d=>JSON.stringify(d).toLowerCase().includes(q));
+  document.getElementById('tbody').innerHTML=filtered.map(d=>{
+    let cls=d.medal==='Gold'?'color:#B8860B;font-weight:800':d.medal==='Silver'?'color:#666;font-weight:800':'color:#8B4513;font-weight:800';
+    let resultText = d.result ? d.result : '-';
+    if(d.category==='Running') resultText = d.result ? d.result + ' (Time)' : '-';
+    if(d.category==='Jumping' || d.category==='Throwing') resultText = d.result ? d.result + ' m' : '-';
+    return `<tr><td>${d.time||''}</td><td>${d.contingent}</td><td>${d.name}</td><td>${d.category}</td><td>${d.event}</td><td style="${cls}">${d.medal}</td><td><b>${resultText}</b></td><td>${d.reportedBy}</td></tr>`
+  }).join('');
+  document.getElementById('count').innerText=`Total: ${data.length} | Gold: ${data.filter(x=>x.medal==='Gold').length} Silver: ${data.filter(x=>x.medal==='Silver').length} Bronze: ${data.filter(x=>x.medal==='Bronze').length}`;
+}
+function shareTally(){
+  let msg="🏆 MIZORAM POLICE SPORTS MEET, 2026 - MEDAL TALLY\n\n"+CONTINGENTS.map(c=>{let g=data.filter(d=>d.contingent===c&&d.medal==='Gold').length,s=data.filter(d=>d.contingent===c&&d.medal==='Silver').length,b=data.filter(d=>d.contingent===c&&d.medal==='Bronze').length; return `${c}: Gold ${g} | Silver ${s} | Bronze ${b} | Total ${g+s+b}`}).join("\n")+"\n\nLive: "+window.location.href;
+  window.open("https://wa.me/?text="+encodeURIComponent(msg),"_blank");
+}
+refreshFromSheet();
+setInterval(()=>refreshFromSheet(), 30000);
+</script>
+</body>
+</html>

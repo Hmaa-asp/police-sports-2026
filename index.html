@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MIZORAM POLICE SPORTS MEET, 2026</title>
+<style>
+*{box-sizing:border-box;font-family:system-ui,Arial}
+body{margin:0;background:#eef2f7;padding:12px}
+.card{max-width:700px;margin:auto;background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.12)}
+.header{background:#0B2C5A;color:#fff;padding:22px;text-align:center}
+.header h1{margin:0;font-size:22px}.header p{color:#FFD700;margin:6px 0 0}
+.body{padding:16px}
+label{font-weight:700;font-size:13px;display:block;margin:12px 0 5px}
+input,select{width:100%;padding:13px;border:1px solid #ccc;border-radius:10px;font-size:16px}
+select#medal{font-weight:800}
+select#medal.gold{color:#B8860B;background:#FFF8DC}
+select#medal.silver{color:#5a5a5a;background:#F2F2F2}
+select#medal.bronze{color:#8B4513;background:#FDE8D0}
+.btns{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+button{flex:1;padding:14px;border:none;border-radius:12px;color:#fff;font-weight:800;font-size:14px;cursor:pointer;min-width:100px}
+.submit{background:#22c55e}.update{background:#2563eb}.clear{background:#ef4444}.wa{background:#25D366}.unlock{background:#0B2C5A}
+table{width:100%;border-collapse:collapse;margin-top:12px;font-size:13px}
+th,td{border:1px solid #ddd;padding:7px;text-align:left}th{background:#0B2C5A;color:#fff}
+.tally th{background:#B8860B}
+.medal-gold{color:#B8860B;font-weight:800}.medal-silver{color:#666;font-weight:800}.medal-bronze{color:#8B4513;font-weight:800}
+.tab{display:flex;gap:8px;margin-top:16px}
+.tab button{background:#ddd;color:#333}.tab button.active{background:#0B2C5A;color:#fff}
+.edit{background:#f59e0b;color:#fff;border:none;padding:5px 10px;border-radius:6px}
+.del{background:#ef4444;color:#fff;border:none;padding:5px 10px;border-radius:6px}
+.lock{text-align:center;padding:30px 16px}
+.lock h2{margin:0}.lock p{color:#666}
+.hint{font-size:12px;color:#888;text-align:center}
+.auto{font-size:12px;color:#22c55e;font-weight:700}
+.result-box{background:#FFF8DC;border:1px solid #FFD700;border-radius:10px;padding:10px;margin-top:12px}
+.result-box label{margin-top:0}
+</style>
+</head>
+<body>
+<div class="card">
+<div class="header"><h1>🏆 MIZORAM POLICE SPORTS MEET, 2026</h1><p>Result Submission & Medal Tally</p></div>
+<div class="body">
+<div id="lockScreen" class="lock">
+<h2>🔒 Password Protected</h2>
+<p>Reporterte chauhin he app hi an hmang thei.<br>Password i hriat loh chuan Dashboard chauh atang chauhin i en thei.</p>
+<label style="text-align:left">Password</label>
+<input id="pwdInput" type="password" placeholder="Password ziak rawh" onkeyup="if(event.key==='Enter') unlockApp()">
+<button class="unlock" style="width:100%;margin-top:12px" onclick="unlockApp()">🔓 UNLOCK</button>
+<p id="pwdError" style="color:red;display:none">❌ Password a dik lo!</p>
+<button onclick="goDashboard()" style="background:#B8860B;width:100%;margin-top:10px">🏅 Medal Tally / Dashboard enna (Password ngai lo)</button>
+<p class="hint">Password i hriat loh chuan Pu K. Lalhmangaiha, Addl.SP(C)/Recorder hnenah zawt rawh.</p>
+</div>
+<div id="mainApp" style="display:none">
+<div style="display:flex;justify-content:space-between;align-items:center">
+<span style="color:#22c55e;font-weight:700">✅ Unlocked</span>
+<button onclick="lockApp()" style="background:#666;flex:none;padding:8px 14px;font-size:12px">🔒 Lock Leh</button>
+</div>
+<div class="tab">
+<button id="tabForm" class="active" onclick="showTab('form')">📝 Submit Result</button>
+<button id="tabTally" onclick="showTab('tally')">🏅 Medal Tally</button>
+<button id="tabList" onclick="showTab('list')">📋 All Results</button>
+</div>
+<div id="formTab">
+<label>Contingent Name</label>
+<select id="contingent"><option value="">-- Select Contingent --</option>
+<option>1st Bn. MAP</option><option>2nd Bn. MAP</option><option>3rd Bn. MAP</option><option>5th IR Bn.</option>
+<option>Northern Range</option><option>Southern Range</option><option>Central Range</option>
+<option>Chhimtuipui Range</option><option>Western Range</option><option>North East Range</option>
+<option>Red Group</option><option>PHQ Group</option></select>
+<label>Name</label><input id="pname" placeholder="Participant hming">
+<label>Categories</label>
+<select id="category" onchange="loadEvents()"><option value="">-- Select Category --</option>
+<option>Running</option><option>Jumping</option><option>Throwing</option><option>Judo</option>
+<option>Taekwondo</option><option>Boxing</option><option>Arm Wrestling</option>
+<option>Football</option><option>Volleyball</option><option>Basketball</option><option>Tug of War</option>
+<option>Badminton</option><option>Table Tennis</option><option>Carrom</option><option>Chess</option>
+<option>Chinese Checker</option><option>Tennis</option><option>Fittest Competition</option><option>Shooting</option></select>
+<label>Events</label><select id="event"><option>-- Select Category First --</option></select>
+<label>Medal Won</label>
+<select id="medal" onchange="colorMedal()"><option value="">-- Select Medal --</option>
+<option value="Gold">🥇 Gold</option><option value="Silver">🥈 Silver</option><option value="Bronze">🥉 Bronze</option></select>
+<div id="resultBox" class="result-box" style="display:none">
+<label id="resultLabel">Result</label>
+<input id="resultValue" placeholder="">
+<p class="hint" id="resultHint" style="text-align:left;margin:6px 0 0"></p>
+</div>
+<label>Reported By <span class="auto" id="autoName"></span></label>
+<input id="reportedBy" placeholder="Reporter hming" oninput="saveReporter()">
+<label>Mobile Number <span class="auto" id="autoMobile"></span></label>
+<input id="mobile" type="tel" placeholder="98623 12345" maxlength="10" oninput="saveReporter()">
+<p class="hint">✅ I number leh hming kha chhut chawp a ngai tawh lo e</p>
+<div class="btns">
+<button class="submit" onclick="submitData()">SUBMIT</button>
+<button class="update" onclick="updateData()">UPDATE</button>
+<button class="clear" onclick="clearForm()">CLEAR</button>
+</div>
+<button class="wa" style="width:100%;margin-top:10px" onclick="shareApp()">📲 WhatsApp Share</button>
+<p id="status" style="text-align:center;font-size:13px;color:#666"></p>
+</div>
+<div id="tallyTab" style="display:none">
+<div style="display:flex;gap:8px"><button onclick="refreshFromSheet()" style="background:#f59e0b">🔄 Refresh - Sheet atangin a la thar</button><span id="tallyUpdated" style="font-size:12px;color:#666;align-self:center"></span></div>
+<h3 style="text-align:center">🏅 LIVE MEDAL TALLY (Google Sheet)</h3>
+<table class="tally"><thead><tr><th>Rank</th><th>Contingent</th><th>🥇 Gold</th><th>🥈 Silver</th><th>🥉 Bronze</th><th>Total</th></tr></thead>
+<tbody id="tallyBody"></tbody></table>
+<button class="wa" style="width:100%;margin-top:10px" onclick="shareTally()">📲 Tally WhatsApp ah Share</button>
+</div>
+<div id="listTab" style="display:none">
+<div style="display:flex;gap:8px"><button onclick="refreshFromSheet()" style="background:#f59e0b">🔄 Refresh - Sheet atangin a la thar</button></div>
+<input id="searchBox" placeholder="🔍 Search..." onkeyup="renderTable()" style="margin-top:12px">
+<div style="overflow-x:auto"><table><thead><tr><th>Contingent</th><th>Name</th><th>Category</th><th>Event</th><th>Medal</th><th>Result</th><th>Reported By</th><th>Mobile</th><th>Action</th></tr></thead><tbody id="tbody"></tbody></table></div>
+<p id="count" style="text-align:center;font-weight:700"></p>
+<button onclick="exportCSV()" style="background:#0B2C5A;width:100%">⬇️ Download Excel (CSV)</button>
+</div>
+</div>
+</div></div>
+<script>
+const APP_PASSWORD = "mpsm2026";
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbwWu2WdPUlI0glsOvLDZLNztOugG9zlqaoKd7YMwccMwPT0QHFt3r9J9kbkmwKFDEC56A/exec";
+const EVENTS = {
+"Running":["100m Race (Men)","100m Race (Women)","200m Race (Men)","400m Race (Men)","1500m Race (Men)","4x100m Relay Race (Men)","Cross Country Race (Men)"],
+"Jumping":["Long Jump (Men)","Long Jump (Women)","Tripple Jump (Men)","High Jump (Men)","High Jump (Women)"],
+"Throwing":["Discus Throw (Men)","Discus Throw (Women)","Javelin Throw (Men)","Javelin Throw (Women)","Shotput (Men)","Shotput (Women)"],
+"Judo":["Judo Below 66 Kgs","Judo Below 73 Kgs","Judo Below 81 Kgs","Judo Below 91 Kgs","Judo Above 91 Kgs"],
+"Taekwondo":["Taekwondo Below 58 Kgs","Taekwondo 59 - 69 Kgs","Taekwondo 69 - 80 Kgs","Taekwondo Above 80 Kgs"],
+"Boxing":["Bantam Weight","Feather Weight","Light Weight","Welter Weight","Middle Weight","Light Heavy Weight","Heavy Weight","Super Heavy Weight"],
+"Arm Wrestling":["Arm Wrestling Below 65 Kgs","Arm Wrestling Below 70 Kgs","Arm Wrestling Below 75 Kgs","Arm Wrestling Below 80 Kgs","Arm Wrestling Below 85 Kgs","Arm Wrestling Below 90 Kgs","Arm Wrestling Above 90 Kgs"],
+"Football":["Team Event - No Sub-Event"],"Volleyball":["Team Event - No Sub-Event"],"Basketball":["Team Event - No Sub-Event"],"Tug of War":["Team Event - No Sub-Event"],
+"Badminton":["Badminton Men's Open Single","Badminton Ladies Open Single","Badminton Men's Open Doubles","Badminton Ladies Open Doubles","Badminton 35+ Men's Doubles","Badminton 40+ Men's Doubles","Badminton 45+ Men's Doubles","Badminton 50+ Men's Doubles","Badminton 55+ Men's Doubles","Badminton GO Men's Single","Badminton GO Men's Doubles"],
+"Table Tennis":["TT Team (Men)","TT Men's Open Single","TT Ladies Open Single","TT Men's Open Doubles","TT Ladies Open Doubles","TT 40+ Men's Single","TT 50+ Men's Single","TT GOs Men's Single"],
+"Carrom":["Carrom Men's Open Single","Carrom Ladies Open Single","Carrom Men's Open Doubles","Carrom Ladies Open Doubles","Carrom Mix Doubles","Carrom 50+ Veteran Single"],
+"Chess":["Chess Men's Open","Chess Ladies Open","Chess Veteran Open (Above 50+)","Chess Veteran Open (Above 55+)","Chess Team"],
+"Chinese Checker":["Chinese Checker Women Open (Single)","Chinese Checker Doubles (Women)","Chinese Checker Triple (Women)],
+"Tennis":["Tennis Men's Single","Tennis Men's Doubles","Tennis GO Single","Tennis GO Doubles"],
+"Fittest Competition":["Fittest Competition Individual"],
+"Shooting":["Pistol 10m Squat for GO","Pistol 10m Squat for General","Pistol 25m Standing for GO","Pistol 25m Standing for General","Pistol 25m Lying for GO","Pistol 25m Lying for General","Carbine 50m Battle Crouch for GO","Carbine 50m Battle Crouch for General","Carbine 50m Standing for GO","Carbine 50m Standing for General","Rifle 100m Standing for GO","Rifle 100m Standing for General","Rifle 100m Kneeling for GO","Rifle 100m Kneeling for General","Rifle 100m Lying for GO","Rifle 100m Lying for General","Air Rifle 10m Standing Men","Air Rifle 10m Standing Women","Air Pistol 10m Standing Men","Air Pistol 10m Standing Women"]
+};
+const CONTINGENTS=["1st Bn. MAP","2nd Bn. MAP","3rd Bn. MAP","5th IR Bn.","Northern Range","Southern Range","Central Range","Chhimtuipui Range","Western Range","North East Range","Red Group","PHQ Group"];
+let data=JSON.parse(localStorage.getItem('police_sports')||'[]'); let editIndex=-1;
+function unlockApp(){
+  let v=document.getElementById('pwdInput').value;
+  if(v===APP_PASSWORD){
+    sessionStorage.setItem('police_unlocked','yes');
+    document.getElementById('lockScreen').style.display='none';
+    document.getElementById('mainApp').style.display='block';
+    loadReporter(); refreshFromSheet();
+  } else { document.getElementById('pwdError').style.display='block'; }
+}
+function lockApp(){ sessionStorage.removeItem('police_unlocked'); document.getElementById('mainApp').style.display='none'; document.getElementById('lockScreen').style.display='block'; document.getElementById('pwdInput').value=''; }
+function goDashboard(){ window.location.href='dashboard.html'; }
+if(sessionStorage.getItem('police_unlocked')==='yes'){ document.getElementById('lockScreen').style.display='none'; document.getElementById('mainApp').style.display='block'; }
+function loadReporter(){
+  let r = localStorage.getItem('police_reporter_name')||'';
+  let m = localStorage.getItem('police_reporter_mobile')||'';
+  if(r){ document.getElementById('reportedBy').value=r; document.getElementById('autoName').innerText='(Auto-filled: '+r+')'; }
+  if(m){ document.getElementById('mobile').value=m; document.getElementById('autoMobile').innerText='(Auto-filled)'; }
+}
+function saveReporter(){
+  let r=document.getElementById('reportedBy').value.trim();
+  let m=document.getElementById('mobile').value.trim();
+  if(r) localStorage.setItem('police_reporter_name',r);
+  if(m) localStorage.setItem('police_reporter_mobile',m);
+}
+loadReporter();
+function refreshFromSheet(){
+  document.getElementById('status').innerText="⏳ Google Sheet atangin data a la mek...";
+  let old = document.getElementById('jsonpScript');
+  if(old) old.remove();
+  window.onSheetData = function(j){
+    if(j && j.results){
+      data = j.results.map(r=>({contingent:r.contingent, name:r.name, category:r.category, event:r.event, medal:r.medal, reportedBy:r.reportedBy, mobile:r.mobile, result:r.result||"", time:r.time}));
+      localStorage.setItem('police_sports', JSON.stringify(data));
+      document.getElementById('status').innerText="✅ Updated: "+j.updated+" • Total: "+j.total;
+      document.getElementById('tallyUpdated').innerText="Updated: "+j.updated;
+    }
+    renderTable(); renderTally();
+  };
+  let s = document.createElement('script');
+  s.id = 'jsonpScript';
+  s.src = SHEET_URL + "?callback=onSheetData&t=" + Date.now();
+  s.onerror = function(){ document.getElementById('status').innerText="❌ Sheet atangin a la thei lo - Apps Script Deploy check rawh"; };
+  document.body.appendChild(s);
+}
+function showTab(t){
+ document.getElementById('formTab').style.display=t==='form'?'block':'none';
+ document.getElementById('tallyTab').style.display=t==='tally'?'block':'none';
+ document.getElementById('listTab').style.display=t==='list'?'block':'none';
+ document.getElementById('tabForm').className=t==='form'?'active':'';
+ document.getElementById('tabTally').className=t==='tally'?'active':'';
+ document.getElementById('tabList').className=t==='list'?'active':'';
+ if(t==='tally'||t==='list') refreshFromSheet();
+}
+function loadEvents(){
+  let cat=document.getElementById('category').value;
+  let ev=document.getElementById('event');
+  ev.innerHTML='<option value="">-- Select Event --</option>';
+  if(!cat){ updateResultBox(''); return; }
+  EVENTS[cat].forEach(e=>{let o=document.createElement('option');o.text=e;ev.add(o);});
+  if(["Football","Volleyball","Basketball","Tug of War"].includes(cat)){ev.value="Team Event - No Sub-Event";ev.disabled=true;}else ev.disabled=false;
+  updateResultBox(cat);
+}
+function updateResultBox(cat){
+  let box=document.getElementById('resultBox');
+  let label=document.getElementById('resultLabel');
+  let inp=document.getElementById('resultValue');
+  let hint=document.getElementById('resultHint');
+  if(cat==='Running'){
+    box.style.display='block'; label.innerText='⏱️ Time (Minute : Second)';
+    inp.placeholder='Eg: 11.24  emaw  1:32.50'; hint.innerText='100m tan Second chauh pawh a tawk. 1500m / Cross Country tan Minute:Second ziak rawh.';
+  } else if(cat==='Jumping'){
+    box.style.display='block'; label.innerText='📏 Distance (Meters)';
+    inp.placeholder='Eg: 6.45'; hint.innerText='Meters in ziak rawh. Eg: Long Jump 6.45m';
+  } else if(cat==='Throwing'){
+    box.style.display='block'; label.innerText='📏 Distance (Meters)';
+    inp.placeholder='Eg: 32.10'; hint.innerText='Meters in ziak rawh. Eg: Javelin 32.10m / Discus / Shotput';
+  } else {
+    box.style.display='none'; inp.value='';
+  }
+}
+function colorMedal(){ let m=document.getElementById('medal'); m.className=m.value==='Gold'?'gold':m.value==='Silver'?'silver':m.value==='Bronze'?'bronze':''; }
+function getForm(){
+  let n=new Date();
+  let ts = String(n.getDate()).padStart(2,'0')+"-"+String(n.getMonth()+1).padStart(2,'0')+"-"+n.getFullYear()+" "+String(n.getHours()).padStart(2,'0')+":"+String(n.getMinutes()).padStart(2,'0')+":"+String(n.getSeconds()).padStart(2,'0');
+  return {contingent:document.getElementById('contingent').value,name:document.getElementById('pname').value.trim(),category:document.getElementById('category').value,event:document.getElementById('event').value,medal:document.getElementById('medal').value,reportedBy:document.getElementById('reportedBy').value.trim(),mobile:document.getElementById('mobile').value.trim(),result:document.getElementById('resultValue').value.trim(),time:ts};
+}
+function validate(d){ if(!d.contingent||!d.name||!d.category||!d.event||!d.medal||!d.reportedBy||!d.mobile){alert("A zawngin fill rawh!");return false;} if(d.mobile.length!==10){alert("Mobile 10 digit ni tur!");return false;} return true; }
+function submitData(){ let d=getForm(); if(!validate(d)) return; saveReporter(); data.push(d); save(); document.getElementById('status').innerText="⏳ Google Sheet ah thawn mek..."; fetch(SHEET_URL,{method:'POST',mode:'no-cors',body:JSON.stringify(d)}).then(()=>{document.getElementById('status').innerText="✅ Google Sheet ah a lut ta!"; setTimeout(refreshFromSheet,1500);}); clearFormKeepReporter(); alert("✅ Submit hlawhtling!"); }
+function updateData(){ if(editIndex<0) return alert("Edit thlang hmasa rawh!"); let d=getForm(); if(!validate(d)) return; data[editIndex]=d; save(); clearFormKeepReporter(); editIndex=-1; alert("✅ Update zo!"); }
+function clearForm(){ clearFormKeepReporter(); }
+function clearFormKeepReporter(){ document.getElementById('contingent').value='';document.getElementById('pname').value='';document.getElementById('category').value='';document.getElementById('event').innerHTML='<option>-- Select Category First --</option>';document.getElementById('medal').value='';document.getElementById('medal').className='';document.getElementById('resultValue').value='';document.getElementById('resultBox').style.display='none'; editIndex=-1; loadReporter(); }
+function editRow(i){ let d=data[i]; editIndex=i; showTab('form'); document.getElementById('contingent').value=d.contingent;document.getElementById('pname').value=d.name;document.getElementById('category').value=d.category;loadEvents();document.getElementById('event').value=d.event;document.getElementById('medal').value=d.medal;document.getElementById('reportedBy').value=d.reportedBy;document.getElementById('mobile').value=d.mobile;document.getElementById('resultValue').value=d.result||'';updateResultBox(d.category);colorMedal(); window.scrollTo({top:0,behavior:'smooth'}); }
+function deleteRow(i){ if(confirm("Delete duh em?")){data.splice(i,1);save();} }
+function save(){ localStorage.setItem('police_sports',JSON.stringify(data)); renderTable(); renderTally(); }
+function renderTally(){ let tally=CONTINGENTS.map(c=>({name:c,gold:data.filter(d=>d.contingent===c&&d.medal==='Gold').length,silver:data.filter(d=>d.contingent===c&&d.medal==='Silver').length,bronze:data.filter(d=>d.contingent===c&&d.medal==='Bronze').length})); tally.forEach(t=>t.total=t.gold+t.silver+t.bronze); tally.sort((a,b)=>b.gold-a.gold||b.silver-a.silver||b.bronze-a.bronze); document.getElementById('tallyBody').innerHTML=tally.map((t,i)=>`<tr><td>${i+1}</td><td><b>${t.name}</b></td><td style="color:#B8860B;font-weight:800">${t.gold}</td><td style="color:#666;font-weight:800">${t.silver}</td><td style="color:#8B4513;font-weight:800">${t.bronze}</td><td><b>${t.total}</b></td></tr>`).join(''); }
+function renderTable(){ let q=(document.getElementById('searchBox').value||'').toLowerCase(); let filtered=data.filter(d=>JSON.stringify(d).toLowerCase().includes(q)); document.getElementById('tbody').innerHTML=filtered.map(d=>{let idx=data.indexOf(d); let cls=d.medal==='Gold'?'medal-gold':d.medal==='Silver'?'medal-silver':'medal-bronze'; return `<tr><td>${d.contingent}</td><td>${d.name}</td><td>${d.category}</td><td>${d.event}</td><td class="${cls}">${d.medal}</td><td><b>${d.result||'-'}</b></td><td>${d.reportedBy}</td><td>${d.mobile}</td><td><button class="edit" onclick="editRow(${idx})">Edit</button> <button class="del" onclick="deleteRow(${idx})">X</button></td></tr>`}).join(''); document.getElementById('count').innerText=`Total: ${data.length} | Gold: ${data.filter(x=>x.medal==='Gold').length} Silver: ${data.filter(x=>x.medal==='Silver').length} Bronze: ${data.filter(x=>x.medal==='Bronze').length}`; }
+function exportCSV(){ let csv="Contingent,Name,Category,Event,Medal,Result,Reported By,Mobile,Time\n"+data.map(d=>`"${d.contingent}","${d.name}","${d.category}","${d.event}","${d.medal}","${d.result||''}","${d.reportedBy}","${d.mobile}","${d.time}"`).join("\n"); let a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download='Police_Sports_2026.csv'; a.click(); }
+function shareApp(){ let msg="🏆 MIZORAM POLICE SPORTS MEET, 2026\nResult Submitna link:\n"+window.location.href+"\n\nDashboard (Tu pawhin en theihna):\n"+window.location.href.replace('index.html','dashboard.html')+"\n\nPassword hi Pu K. Lalhmangaiha Addl.SP(C) hnenah a hranin zawt rawh."; window.open("https://wa.me/?text="+encodeURIComponent(msg),"_blank"); }
+function shareTally(){ let msg="🏆 MIZORAM POLICE SPORTS MEET, 2026 - MEDAL TALLY\n\n"+CONTINGENTS.map(c=>{let g=data.filter(d=>d.contingent===c&&d.medal==='Gold').length,s=data.filter(d=>d.contingent===c&&d.medal==='Silver').length,b=data.filter(d=>d.contingent===c&&d.medal==='Bronze').length; return `${c}: Gold ${g} | Silver ${s} | Bronze ${b} | Total ${g+s+b}`}).join("\n")+"\n\nLive: "+window.location.href; window.open("https://wa.me/?text="+encodeURIComponent(msg),"_blank"); }
+renderTable(); renderTally();
+setInterval(()=>{ if(document.getElementById('mainApp').style.display!=='none') refreshFromSheet(); }, 30000);
+</script>
+</body>
+</html>
